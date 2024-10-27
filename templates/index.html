@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detección de Puntos Faciales</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <style>
+        /* Estilo general del cuerpo */
+        body {
+            background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+            font-family: 'Arial', sans-serif;
+            color: #4a3f55;
+        }
+
+        /* Contenedor principal */
+        .container {
+            margin-top: 50px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Encabezado */
+        h1 {
+            color: #5e3c6f;
+            font-weight: 700;
+        }
+
+        /* Botones */
+        .btn-primary {
+            background-color: #8a2be2;
+            border-color: #7a1fbd;
+        }
+
+        .btn-primary:hover {
+            background-color: #7a1fbd;
+            border-color: #6b1da8;
+        }
+
+        .btn-secondary {
+            background-color: #d1b3ff;
+            border-color: #b59bdb;
+            color: #4a3f55;
+        }
+
+        .btn-secondary:hover {
+            background-color: #b59bdb;
+            border-color: #9b83c0;
+        }
+
+        /* Estilo del contenedor de imágenes */
+        .img-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 15px;
+            border: 3px solid #cba6f7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <h1 class="mb-4">Sube una Imagen para Detección Facial</h1>
+        <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <input type="file" name="file" class="form-control" accept="image/*" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Procesar Imagen</button>
+        </form>
+
+        <div class="img-container mt-5">
+            {% if image_file %}
+                <h3 class="mt-4">Imagen Procesada:</h3>
+                <img src="{{ image_file }}" alt="Imagen Procesada">
+                <form action="{{ url_for('index') }}">
+                    <button class="btn btn-secondary mt-3">Subir Nueva Imagen</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
