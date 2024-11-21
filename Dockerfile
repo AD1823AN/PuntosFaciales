@@ -1,23 +1,11 @@
 # Usa una imagen base de Python
 FROM python:3.9-slim
 
-# Instalar dependencias del sistema necesarias para dlib y matplotlib
+# Instalar dependencias del sistema necesarias para Mediapipe y matplotlib
 RUN apt-get update && apt-get install -y \
-    cmake \
-    g++ \
-    wget \
-    unzip \
-    libopenblas-dev \
-    liblapack-dev \
-    libx11-dev \
+    libopencv-dev \
     libgtk-3-dev \
-    libboost-all-dev \
-    libfreetype6-dev \
-    pkg-config \
-    libpng-dev \
-    libjpeg-dev \
     && apt-get clean
-
 
 # Establecer el directorio de trabajo
 WORKDIR /app
@@ -28,15 +16,16 @@ COPY . .
 # Actualizar pip y wheel
 RUN pip install --upgrade pip wheel setuptools
 
-# Instalar dependencias de Python
+# Instalar dependencias de Python, incluyendo Mediapipe
 RUN pip install --no-cache-dir -r requirements.txt
-RUN python -c "import matplotlib.pyplot as plt" && echo 'Matplotlib installed correctly' || exit 1
 
-
+# Verificar la instalación de Mediapipe y Matplotlib
+RUN python -c "import mediapipe as mp; import matplotlib.pyplot as plt" && echo 'Mediapipe y Matplotlib instalados correctamente' || exit 1
 
 # Exponer el puerto 5000 (usado por Flask)
 EXPOSE 5000
 
 # Comando para iniciar la aplicación
 CMD ["python", "app.py"]
+
 
