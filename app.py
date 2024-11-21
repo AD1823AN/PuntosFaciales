@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from flask import Flask, render_template, request, redirect
 from PIL import Image
-import dlib
+import mediapipe as mp
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
@@ -19,13 +19,18 @@ SCOPES = ['https://www.googleapis.com/auth/drive']
 CREDS_FILE = 'credentials.json'
 DATASET_FOLDER_ID = '14asAhgF9Y4GdWAlDbYSqsN0FlxYP_IJg'  # ID de la carpeta de Drive
 
-# Ruta al predictor de puntos faciales
-PREDICTOR_PATH = "shape_predictor_68_face_landmarks.dat"
+# Inicializar Mediapipe Face Mesh
+mp_face_mesh = mp.solutions.face_mesh
 
-# Inicializar Dlib
-face_detector = dlib.get_frontal_face_detector()
-landmark_predictor = dlib.shape_predictor(PREDICTOR_PATH)
-
+# Lista de puntos clave para cejas, nariz, boca y ojos
+IMPORTANT_POINTS = {
+    'left_eyebrow': [70, 107],
+    'right_eyebrow': [336,  300],
+    'nose': [1],
+    'mouth': [78, 308, 13, 14],
+    'left_eye': [33, 159, 133],
+    'right_eye': [362, 386, 263],
+}
 
 def authenticate_drive():
     """Autentica y devuelve el servicio de Google Drive."""
@@ -41,7 +46,6 @@ def authenticate_drive():
 
 
 drive_service = authenticate_drive()
-
 
 def upload_to_drive(file_content, filename):
     """Sube un archivo a Google Drive."""
@@ -85,36 +89,41 @@ def upload_file():
 
 def process_and_plot_image(file):
     """Procesa la imagen y genera cuatro versiones: original, girada, con brillo y rotada."""
-    img = Image.open(file).convert('L')
+    img = Image.open(file).convert('RGB')
     img.thumbnail((800, 800))
     img_arr = np.array(img)
 
-    faces = face_detector(img_arr)
-    if len(faces) == 0:
+    # Detectar rostros y landmarks con Mediapipe Face Mesh
+    with mp_face_mesh.FaceMesh(static_image_mode=True, max_num_faces=1, refine_landmarks=True, min_detection_confidence=0.5) as face_mesh:
+        results = face_mesh.process(img_arr)
+
+    if not results.multi_face_landmarks:
         return None
 
-    face = faces[0]
-    landmarks = landmark_predictor(img_arr, face)
+    face_landmarks = results.multi_face_landmarks[0]
 
     # Dibujar puntos faciales en la imagen
     def draw_landmarks(image_array, landmarks, transform=None):
         fig, ax = plt.subplots(figsize=(5, 5))
-        ax.imshow(image_array, cmap='gray')
+        ax.imshow(image_array)
         ax.axis('off')
 
-        key_points = [17, 21, 22, 26, 36, 39, 37, 42, 45, 43, 30, 48, 54, 51, 57]
-        for n in key_points:
-            x = landmarks.part(n).x
-            y = landmarks.part(n).y
+        h, w, _ = image_array.shape  # Tamaño original de la imagen
 
-            # Aplicar transformaciones para imágenes rotadas/volteadas
-            if transform == "flipped":
-                x = image_array.shape[1] - x
-            elif transform == "rotated":
-                x = image_array.shape[1] - x
-                y = image_array.shape[0] - y
+        for feature, indices in IMPORTANT_POINTS.items():
+            for idx in indices:
+                landmark = landmarks.landmark[idx]
+                x = int(landmark.x * w)
+                y = int(landmark.y * h)
 
-            ax.plot(x, y, 'rx', markersize=5)
+                # Ajustar coordenadas según la transformación
+                if transform == "flipped":  # Imagen volteada horizontalmente
+                    x = w - x
+                elif transform == "rotated":  # Imagen rotada 180°
+                    x = w - x
+                    y = h - y
+
+                ax.plot(x, y, 'rx', markersize=4)  # Tamaño del punto ajustado para mayor claridad
 
         buf = io.BytesIO()
         plt.savefig(buf, format='png', bbox_inches='tight', pad_inches=0)
@@ -130,10 +139,10 @@ def process_and_plot_image(file):
         return f"data:image/png;base64,{img_base64}"
 
     # Generar imágenes procesadas
-    original_buf = draw_landmarks(img_arr, landmarks)
-    flipped_buf = draw_landmarks(img_arr[:, ::-1], landmarks, transform="flipped")
-    brightened_buf = draw_landmarks(np.clip(img_arr * 1.8, 0, 255).astype(np.uint8), landmarks)
-    rotated_buf = draw_landmarks(np.rot90(img_arr, 2), landmarks, transform="rotated")
+    original_buf = draw_landmarks(img_arr, face_landmarks)
+    flipped_buf = draw_landmarks(img_arr[:, ::-1], face_landmarks, transform="flipped")
+    brightened_buf = draw_landmarks(np.clip(img_arr * 1.8, 0, 255).astype(np.uint8), face_landmarks)
+    rotated_buf = draw_landmarks(np.rot90(img_arr, 2), face_landmarks, transform="rotated")
 
     return {
         'original': buffer_to_base64(original_buf, "original.png"),
@@ -145,3 +154,4 @@ def process_and_plot_image(file):
 
 if __name__ == '__main__':
     app.run(debug=True, port=5003)
+
