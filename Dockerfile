@@ -1,4 +1,3 @@
-
 # Imagen base de Python
 FROM python:3.8-slim
 
@@ -14,13 +13,14 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     && apt-get clean
 
-# Instalar dependencias de Python
+# Instalar pip y las dependencias de Python
 RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --use-deprecated=legacy-resolver -r requirements.txt
 
 # Exponer el puerto que usa Flask
-EXPOSE 5001
+EXPOSE 5000
 
 # Comando para iniciar la aplicación
 CMD ["python", "app.py"]
+
 
