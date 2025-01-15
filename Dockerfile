@@ -1,7 +1,6 @@
 FROM python:3.8-slim
 WORKDIR /app
 COPY . /app
-# Actualizar el sistema y asegurar dependencias del sistema operativo
 RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
