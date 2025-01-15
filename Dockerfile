@@ -14,7 +14,6 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir --use-deprecated=legacy-resolver -r requirements.txt
 # Exponer el puerto que usa Flask
 EXPOSE 5000
-
 # Comando para iniciar la aplicación
 CMD ["python", "app.py"]
 
