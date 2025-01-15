@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y \
 # Instalar pip y las dependencias de Python
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir --use-deprecated=legacy-resolver -r requirements.txt
-
 # Exponer el puerto que usa Flask
 EXPOSE 5000
 
