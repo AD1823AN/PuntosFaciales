@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
     libgl1-mesa-glx \
     libglib2.0-0 \
     && apt-get clean
-
 # Instalar pip y las dependencias de Python
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir --use-deprecated=legacy-resolver -r requirements.txt
