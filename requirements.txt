@@ -1,4 +1,6 @@
 Flask==2.2.3
+Werkzeug==2.2.3
+Jinja2==3.1.2
 google-api-core==2.21.0
 google-api-python-client==2.149.0
 google-auth==2.35.0
@@ -8,11 +10,10 @@ gdown==5.2.0
 gspread==6.1.4
 numpy==1.21.6
 opencv-python-headless==4.6.0.66
-Werkzeug==2.2.3
-Jinja2==3.1.2
 matplotlib==3.7.1
 mediapipe==0.10.13
 tensorflow==2.12.0
+
 
 
 
