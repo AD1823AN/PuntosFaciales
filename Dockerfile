@@ -1,5 +1,4 @@
 FROM python:3.8-slim
-# Establecer el directorio de trabajo en el contenedor
 WORKDIR /app
 # Copiar los archivos necesarios al contenedor
 COPY . /app
