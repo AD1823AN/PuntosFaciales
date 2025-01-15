@@ -1,6 +1,5 @@
 FROM python:3.8-slim
 WORKDIR /app
-# Copiar los archivos necesarios al contenedor
 COPY . /app
 # Actualizar el sistema y asegurar dependencias del sistema operativo
 RUN apt-get update && apt-get install -y \
